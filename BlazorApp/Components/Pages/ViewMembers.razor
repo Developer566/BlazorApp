@@ -1,0 +1,107 @@
+@page "/members"
+@rendermode InteractiveServer
+@using BlazorApp.Data
+@using BlazorApp.Models
+@using BlazorApp.Services
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext db
+@inject NavigationManager Nav
+@inject ToastService ToastService
+
+@if (isToastVisible)
+{
+    <div style="position:fixed; top:20px; right:20px; z-index:9999; min-width:300px;"
+         class="alert alert-success alert-dismissible shadow" role="alert">
+        <strong>@toastMessage</strong>
+        <button type="button" class="btn-close" @onclick="() => isToastVisible = false"></button>
+    </div>
+}
+
+<h3>All Members</h3>
+<a href="/register" class="btn btn-success mb-3">+ Add New Member</a>
+
+@if (members == null)
+{
+    <p>Loading...</p>
+}
+else if (!members.Any())
+{
+    <p>No members found.</p>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Id</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Membership</th>
+                <th>Registered</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var m in members)
+            {
+                <tr>
+                    <td>@m.Id</td>
+                    <td>@m.FullName</td>
+                    <td>@m.Email</td>
+                    <td>@m.Phone</td>
+                    <td>@m.MembershipType</td>
+                    <td>@m.RegisteredDate.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        <a href="/edit/@m.Id" class="btn btn-warning btn-sm">Edit</a>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteMember(m.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Member>? members;
+    private bool isToastVisible = false;
+    private string toastMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        members = await db.Members.ToListAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && ToastService.PendingMessage != null)
+        {
+            toastMessage = ToastService.PendingMessage;
+            ToastService.PendingMessage = null;
+            isToastVisible = true;
+            StateHasChanged();
+
+            await Task.Delay(3000);
+            isToastVisible = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DeleteMember(int id)
+    {
+        var member = await db.Members.FindAsync(id);
+        if (member != null)
+        {
+            db.Members.Remove(member);
+            await db.SaveChangesAsync();
+            members = await db.Members.ToListAsync();
+            toastMessage = "🗑️ Member deleted successfully!";
+            isToastVisible = true;
+            StateHasChanged();
+
+            await Task.Delay(3000);
+            isToastVisible = false;
+            StateHasChanged();
+        }
+    }
+}

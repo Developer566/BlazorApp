@@ -1,0 +1,46 @@
+@rendermode InteractiveServer
+
+<h4>Counter Component</h4>
+<p>Current Value: @currentValue</p>
+
+<button class="btn btn-primary" @onclick="Increment">
+    Increment
+</button>
+
+<button class="btn btn-secondary" @onclick="Reset">
+    Reset
+</button>
+@code {
+    // Parent se value receive karne ke liye
+    [Parameter]
+    public int StartValue { get; set; }
+
+    // Parent ko notify karne ke liye
+    [Parameter]
+    public EventCallback<int> OnValueChanged { get; set; }
+
+    // Internal state (private)
+    private int currentValue;
+
+    // Lifecycle method: parameter set hote hi currentValue sync karo
+    protected override void OnParametersSet()
+    {
+        currentValue = StartValue;
+    }
+
+    // Increment method
+    private async Task Increment()
+    {
+        currentValue++;
+        // Notify parent
+        await OnValueChanged.InvokeAsync(currentValue);
+    }
+
+    // Reset method
+    private async Task Reset()
+    {
+        StartValue=0;
+        currentValue = StartValue;
+        await OnValueChanged.InvokeAsync(currentValue);
+    }
+}

@@ -1,0 +1,38 @@
+@using BlazorApp.Services
+@inject ToastService ToastService
+@implements IDisposable
+
+@if (isVisible)
+{
+    <div style="position:fixed; top:20px; right:20px; z-index:9999; min-width:300px;"
+         class="alert alert-@toastType alert-dismissible fade show shadow" role="alert">
+        <strong>@toastMessage</strong>
+        <button type="button" class="btn-close" @onclick="Hide"></button>
+    </div>
+}
+
+@code {
+    private bool isVisible = false;
+    private string toastMessage = "";
+    private string toastType = "success";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && ToastService.PendingMessage != null)
+        {
+            toastMessage = ToastService.PendingMessage;
+            toastType = ToastService.PendingType;
+            ToastService.PendingMessage = null;
+            isVisible = true;
+            StateHasChanged();
+
+            await Task.Delay(3000);
+            isVisible = false;
+            StateHasChanged();
+        }
+    }
+
+    private void Hide() => isVisible = false;
+
+    public void Dispose() { }
+}

@@ -1,0 +1,18 @@
+@page "/counterdemo"
+@rendermode InteractiveServer
+<PageTitle>Counter Demo</PageTitle>
+<h3>Counter Demo</h3>
+
+<p>Parent sees value: @parentValue</p>
+
+<!-- Pass start value and handle child event -->
+<CounterComponent StartValue="10" OnValueChanged="HandleValueChanged" />
+
+@code {
+    private int parentValue;
+
+    private void HandleValueChanged(int newValue)
+    {
+        parentValue = newValue;
+    }
+}

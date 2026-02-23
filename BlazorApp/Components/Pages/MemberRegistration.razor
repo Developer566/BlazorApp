@@ -1,0 +1,65 @@
+@page "/register"
+@rendermode InteractiveServer
+@using BlazorApp.Data
+@using BlazorApp.Models
+@inject AppDbContext db
+@inject NavigationManager Nav
+
+<PageTitle>Registration</PageTitle>
+<h3>Member Registration</h3>
+
+<EditForm Model="@member" OnValidSubmit="HandleValidSubmit" FormName="MemberRegistrationForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Full Name</label><br />
+        <InputText @bind-Value="member.FullName" placeholder="Enter full name" class="form-control" />
+    </div>
+    <br />
+
+    <div>
+        <label>Email</label><br />
+        <InputText @bind-Value="member.Email" placeholder="Enter email" class="form-control" />
+    </div>
+    <br />
+
+    <div>
+        <label>Phone</label><br />
+        <InputText @bind-Value="member.Phone" placeholder="Enter phone number" class="form-control" />
+    </div>
+    <br />
+
+    <div>
+        <label>Membership Type</label><br />
+        <InputSelect @bind-Value="member.MembershipType" class="form-control">
+            <option value="">-- Select Type --</option>
+            <option value="Basic">Basic</option>
+            <option value="Premium">Premium</option>
+            <option value="VIP">VIP</option>
+        </InputSelect>
+    </div>
+    <br />
+
+    <button type="submit" class="btn btn-info">Register</button>
+</EditForm>
+
+@if (successMessage != "")
+{
+    <p style="color:green; font-weight:bold;">@successMessage</p>
+}
+
+@code {
+    private Member member = new Member();
+    private string successMessage = "";
+
+    private async Task HandleValidSubmit()
+    {
+        db.Members.Add(member);
+        await db.SaveChangesAsync();
+        successMessage = $"✅ {member.FullName} registered successfully!";
+          await Task.Delay(1500);
+        Nav.NavigateTo("/members");
+        member = new Member(); // reset form
+    }
+}

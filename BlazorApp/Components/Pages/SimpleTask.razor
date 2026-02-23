@@ -1,0 +1,20 @@
+@page "/simpletask"
+@rendermode InteractiveServer
+
+<h3>Test Greeting</h3>
+
+<input @bind="UserName" placeholder="Enter name" />
+
+<button @onclick="ShowGreeting">Say Hello</button>
+
+<p>@GreetingMessage</p>
+
+@code {
+    private string UserName = "";
+    private string GreetingMessage = "";
+
+    private void ShowGreeting()
+    {
+        GreetingMessage = "Hello " + UserName;
+    }
+}

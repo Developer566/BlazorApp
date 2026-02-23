@@ -1,0 +1,81 @@
+@page "/edit/{id:int}"
+@rendermode InteractiveServer
+@using BlazorApp.Data
+@using BlazorApp.Models
+@using BlazorApp.Services
+@inject AppDbContext db
+@inject NavigationManager Nav
+@inject ToastService ToastService
+
+<PageTitle>Edit Member Form</PageTitle>
+<h3>Edit Member</h3>
+
+@if (member == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="@member" OnValidSubmit="HandleUpdate" FormName="EditMemberForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div>
+            <label>Full Name</label><br />
+            <InputText @bind-Value="member.FullName" class="form-control" />
+        </div>
+        <br />
+
+        <div>
+            <label>Email</label><br />
+            <InputText @bind-Value="member.Email" class="form-control" />
+        </div>
+        <br />
+
+        <div>
+            <label>Phone</label><br />
+            <InputText @bind-Value="member.Phone" class="form-control" />
+        </div>
+        <br />
+
+        <div>
+            <label>Membership Type</label><br />
+            <InputSelect @bind-Value="member.MembershipType" class="form-control">
+                <option value="">-- Select Type --</option>
+                <option value="Basic">Basic</option>
+                <option value="Premium">Premium</option>
+                <option value="VIP">VIP</option>
+            </InputSelect>
+        </div>
+        <br />
+
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a href="/members" class="btn btn-secondary ms-2">Cancel</a>
+    </EditForm>
+
+    @if (successMessage != "")
+    {
+        <p style="color:green; font-weight:bold;">@successMessage</p>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Member? member;
+    private string successMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        member = await db.Members.FindAsync(Id);
+    }
+
+    private async Task HandleUpdate()
+    {
+        db.Members.Update(member!);
+        await db.SaveChangesAsync();
+        ToastService.QueueSuccess("✅ Member updated successfully!");
+        await Task.Delay(500);
+        Nav.NavigateTo("/members"); // redirect back to list
+    }
+}

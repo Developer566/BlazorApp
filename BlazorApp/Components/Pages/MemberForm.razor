@@ -1,0 +1,56 @@
+@page "/memberform"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+<PageTitle>Member Registration Form</PageTitle>
+<h3>Member Registration Form</h3>
+
+<EditForm Model="@member" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Name:</label>
+        <InputText @bind-Value="member.Name" class="form-control" />
+    </div>
+
+    <div>
+        <label>Email:</label>
+        <InputText @bind-Value="member.Email" class="form-control" />
+    </div>
+
+    <div>
+        <label>Age:</label>
+        <InputNumber @bind-Value="member.Age" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-success mt-2">Submit</button>
+</EditForm>
+
+@if (submitted)
+{
+    <p style="color: green;">Member saved: @member.Name (@member.Email), Age: @member.Age</p>
+}
+
+@code {
+    private Member member = new Member();
+    private bool submitted = false;
+
+    private void HandleValidSubmit()
+    {
+        // Here you can save data to DB or in-memory list
+        submitted = true;
+    }
+
+  public class Member
+{
+    [Required(ErrorMessage = "Name is required")]
+    public string Name { get; set; } = "";
+
+    [EmailAddress(ErrorMessage = "Invalid email")]
+    public string Email { get; set; } = "";
+
+    [Range(18, 100, ErrorMessage = "Age must be between 18 and 100")]
+    public int Age { get; set; }
+}
+
+}
