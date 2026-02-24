@@ -11,7 +11,7 @@
 @if (isToastVisible)
 {
     <div style="position:fixed; top:20px; right:20px; z-index:9999; min-width:300px;"
-         class="alert alert-success alert-dismissible shadow" role="alert">
+        class="alert alert-success alert-dismissible shadow" role="alert">
         <strong>@toastMessage</strong>
         <button type="button" class="btn-close" @onclick="() => isToastVisible = false"></button>
     </div>
@@ -43,7 +43,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var m in members)
+            @foreach (var m in pagedMembers)
             {
                 <tr>
                     <td>@m.Id</td>
@@ -60,16 +60,49 @@ else
             }
         </tbody>
     </table>
+
+    <!-- Pagination Controls -->
+    <nav>
+        <ul class="pagination">
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="PrevPage">Previous</button>
+            </li>
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                var pageNum = i;
+                <li class="page-item @(currentPage == pageNum ? "active" : "")">
+                    <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
+                </li>
+            }
+
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="NextPage">Next</button>
+            </li>
+        </ul>
+    </nav>
+
+    <p class="text-muted">
+        Showing @((currentPage - 1) * pageSize + 1) to @(Math.Min(currentPage * pageSize, members.Count)) of @members.Count
+        members
+    </p>
 }
 
 @code {
     private List<Member>? members;
+    private List<Member> pagedMembers = new();
+
     private bool isToastVisible = false;
     private string toastMessage = "";
 
+    // Pagination
+    private int currentPage = 1;
+    private int pageSize = 5; // change to 10 if you want
+    private int totalPages => (int)Math.Ceiling((members?.Count ?? 0) / (double)pageSize);
+
     protected override async Task OnInitializedAsync()
     {
-        members = await db.Members.ToListAsync();
+        await LoadMembers();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -87,6 +120,44 @@ else
         }
     }
 
+    private async Task LoadMembers()
+    {
+        members = await db.Members.ToListAsync();
+        UpdatePagedMembers();
+    }
+
+    private void UpdatePagedMembers()
+    {
+        pagedMembers = members!
+        .Skip((currentPage - 1) * pageSize)
+        .Take(pageSize)
+        .ToList();
+    }
+
+    private void GoToPage(int pageNum)
+    {
+        currentPage = pageNum;
+        UpdatePagedMembers();
+    }
+
+    private void PrevPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            UpdatePagedMembers();
+        }
+    }
+
+    private void NextPage()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+            UpdatePagedMembers();
+        }
+    }
+
     private async Task DeleteMember(int id)
     {
         var member = await db.Members.FindAsync(id);
@@ -94,7 +165,7 @@ else
         {
             db.Members.Remove(member);
             await db.SaveChangesAsync();
-            members = await db.Members.ToListAsync();
+            await LoadMembers();
             toastMessage = "🗑️ Member deleted successfully!";
             isToastVisible = true;
             StateHasChanged();
