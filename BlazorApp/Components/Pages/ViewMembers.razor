@@ -9,6 +9,8 @@
 @inject ToastService ToastService
 @inject ExportService ExportService
 @inject IJSRuntime JS
+
+<PageTitle>Members</PageTitle>
 @if (isToastVisible)
 {
     <div style="position:fixed; top:20px; right:20px; z-index:9999; min-width:300px;"
@@ -109,10 +111,11 @@ else
 @code {
     private List<Member>? members;
     private List<Member> pagedMembers = new();
-
+    private List<Member> filteredMembers = new();
     private bool isToastVisible = false;
     private string toastMessage = "";
     private bool showConfirm = false;
+    private string searchText = "";
     private int memberToDeleteId;
     private string confirmMemberName = "";
     // Pagination

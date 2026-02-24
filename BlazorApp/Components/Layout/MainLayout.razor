@@ -1,24 +1,65 @@
 ﻿@inherits LayoutComponentBase
 @using BlazorApp.Components.Shared
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@using BlazorApp.Services
+@inject AuthService AuthService
+@inject NavigationManager Nav
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+@if (Nav.Uri.Contains("/login"))
+{
+    @Body
+}
+else
+{
+    @* 👆 Agar login page nahi hai to check karo *@
+    if (!AuthService.IsLoggedIn)
+    {
+        @* 👆 Login nahi hai to redirect karo *@
+        Nav.NavigateTo("/login");
+    }
+    else
+    {
+        <div class="page">
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+            <main>
+                <div class="top-row px-4">
+                    <TopBar />
+                </div>
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+        <div id="blazor-error-ui" data-nosnippet>
+            An unhandled error has occurred.
+            <a href="." class="reload">Reload</a>
+            <span class="dismiss">🗙</span>
+        </div>
+        <Toast />
+    }
+}
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
-<Toast/>
+@code {
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += OnLocationChanged;
+        // 👆 Har page change pe check karo
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        if (!AuthService.IsLoggedIn && !e.Location.Contains("/login"))
+        {
+            Nav.NavigateTo("/login");
+            // 👆 Agar koi directly URL type kare — wapas login pe bhejo
+        }
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= OnLocationChanged;
+        // 👆 Event unsubscribe karo — memory leak se bachao
+    }
+}

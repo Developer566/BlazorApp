@@ -1,0 +1,22 @@
+@rendermode InteractiveServer
+@using BlazorApp.Services
+@inject AuthService AuthService
+@inject NavigationManager Nav
+
+@if (AuthService.IsLoggedIn)
+{
+    <span class="me-3">👤 @AuthService.CurrentUser?.Username</span>
+    <button class="btn btn-sm btn-danger" @onclick="Logout">Logout</button>
+}
+else
+{
+    <a href="/login" class="btn btn-sm btn-primary">Login</a>
+}
+
+@code {
+    private void Logout()
+    {
+        AuthService.Logout();
+        Nav.NavigateTo("/login");
+    }
+}

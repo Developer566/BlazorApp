@@ -2,6 +2,7 @@ using BlazorApp.Components;
 using BlazorApp.Data;
 using Microsoft.EntityFrameworkCore;
 using BlazorApp.Services;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -10,8 +11,9 @@ builder.Services.AddRazorComponents()
 
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+builder.Services.AddSingleton<AuthService>();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<ExportService>();
 var app = builder.Build();
@@ -31,5 +33,28 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+using (var scope = app.Services.CreateScope())
+{
+    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
+    using var db = factory.CreateDbContext();
+    // 👆 Program.cs mein directly db inject nahi hoti
+    // isliye manually scope banate hain aur db lete hain
 
+    if (!db.Users.Any())
+    // 👆 Any() = koi bhi user hai database mein?
+    // ! = nahi — matlab agar koi user NAHI hai to andar jao
+    {
+        db.Users.Add(new BlazorApp.Models.User
+        {
+            Username = "admin",
+            Password = "admin123",
+            Role = "Admin"
+        });
+        // 👆 pehla admin user banao
+
+        db.SaveChanges();
+        // 👆 database mein save karo
+        // SaveChanges() = commit — jaise SQL ka INSERT
+    }
+}
 app.Run();

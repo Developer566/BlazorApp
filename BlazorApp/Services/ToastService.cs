@@ -19,5 +19,6 @@ namespace BlazorApp.Services
             PendingMessage = message;
             PendingType = "success";
         }
+        
     }
 }
