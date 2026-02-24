@@ -13,6 +13,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 builder.Services.AddScoped<ToastService>();
+builder.Services.AddScoped<ExportService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

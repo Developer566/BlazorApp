@@ -7,7 +7,8 @@
 @inject AppDbContext db
 @inject NavigationManager Nav
 @inject ToastService ToastService
-
+@inject ExportService ExportService
+@inject IJSRuntime JS
 @if (isToastVisible)
 {
     <div style="position:fixed; top:20px; right:20px; z-index:9999; min-width:300px;"
@@ -19,7 +20,8 @@
 
 <h3>All Members</h3>
 <a href="/register" class="btn btn-success mb-3">+ Add New Member</a>
-
+<button class="btn btn-danger mb-3 ms-2" @onclick="ExportPdf">⬇ Export PDF</button>
+<button class="btn btn-success mb-3 ms-2" @onclick="ExportExcel">⬇ Export Excel</button>
 @if (members == null)
 {
     <p>Loading...</p>
@@ -54,13 +56,29 @@ else
                     <td>@m.RegisteredDate.ToString("yyyy-MM-dd")</td>
                     <td>
                         <a href="/edit/@m.Id" class="btn btn-warning btn-sm">Edit</a>
-                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteMember(m.Id)">Delete</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => ShowConfirm(m.Id, m.FullName)">Delete</button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
-
+    <!-- Confirmation Dialog -->
+    @if (showConfirm)
+    {
+        <div style="position:fixed; top:0; left:0; width:100%; height:100%; 
+                                        background:rgba(0,0,0,0.5); z-index:9998;">
+            <div
+                style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+                                            background:white; padding:30px; border-radius:10px; 
+                                            z-index:9999; min-width:350px; text-align:center; box-shadow: 0 5px 30px rgba(0,0,0,0.3);">
+                <h4>⚠️ Confirm Delete</h4>
+                <p>Are you sure you want to delete <strong>@confirmMemberName</strong>?</p>
+                <p class="text-muted">This action cannot be undone.</p>
+                <button class="btn btn-danger me-3" @onclick="ConfirmDelete">Yes, Delete</button>
+                <button class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
+            </div>
+        </div>
+    }
     <!-- Pagination Controls -->
     <nav>
         <ul class="pagination">
@@ -94,7 +112,9 @@ else
 
     private bool isToastVisible = false;
     private string toastMessage = "";
-
+    private bool showConfirm = false;
+    private int memberToDeleteId;
+    private string confirmMemberName = "";
     // Pagination
     private int currentPage = 1;
     private int pageSize = 5; // change to 10 if you want
@@ -157,7 +177,23 @@ else
             UpdatePagedMembers();
         }
     }
-
+    private void ShowConfirm(int id, string name)
+    {
+        memberToDeleteId = id;
+        confirmMemberName = name;
+        showConfirm = true;
+    }
+    private void CancelDelete()
+    {
+        showConfirm = false;
+        memberToDeleteId = 0;
+        confirmMemberName = "";
+    }
+    private async Task ConfirmDelete()
+    {
+        showConfirm = false;
+        await DeleteMember(memberToDeleteId);
+    }
     private async Task DeleteMember(int id)
     {
         var member = await db.Members.FindAsync(id);
@@ -174,5 +210,18 @@ else
             isToastVisible = false;
             StateHasChanged();
         }
+    }
+    private async Task ExportExcel()
+    {
+        var data = ExportService.ExportToExcel(members!);
+        await JS.InvokeVoidAsync("downloadFile", "Members.xlsx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        data);
+    }
+
+    private async Task ExportPdf()
+    {
+        var data = ExportService.ExportToPdf(members!);
+        await JS.InvokeVoidAsync("downloadFile", "Members.pdf", "application/pdf", data);
     }
 }
