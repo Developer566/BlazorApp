@@ -42,7 +42,7 @@
     {
         bool success = AuthService.Login(username, password);
         if (success)
-            Nav.NavigateTo("/members");
+            Nav.NavigateTo("/");
         else
             errorMessage = "❌ Invalid username or password!";
     }
