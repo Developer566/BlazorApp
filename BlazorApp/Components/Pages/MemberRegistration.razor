@@ -2,9 +2,10 @@
 @rendermode InteractiveServer
 @using BlazorApp.Data
 @using BlazorApp.Models
+@using BlazorApp.Services
 @inject AppDbContext db
 @inject NavigationManager Nav
-
+@inject ToastService ToastService;
 <PageTitle>Registration</PageTitle>
 <h3>Member Registration</h3>
 
@@ -57,7 +58,8 @@
     {
         db.Members.Add(member);
         await db.SaveChangesAsync();
-        successMessage = $"✅ {member.FullName} registered successfully!";
+            ToastService.QueueSuccess($"✅ {member.FullName} registered successfully!");
+        
           await Task.Delay(1500);
         Nav.NavigateTo("/members");
         member = new Member(); // reset form
