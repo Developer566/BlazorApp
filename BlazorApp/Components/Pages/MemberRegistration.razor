@@ -8,6 +8,7 @@
 @inject ToastService ToastService;
 @inject EmailService EmailService;
 @using Microsoft.EntityFrameworkCore
+@inject IWebHostEnvironment Env 
 @inject IDbContextFactory<AppDbContext> DbFactory
 <PageTitle>Registration</PageTitle>
 <h3>Member Registration</h3>
@@ -43,6 +44,21 @@
             <option value="VIP">VIP</option>
         </InputSelect>
     </div>
+    @* Image upload field *@
+    <div class="mb-3">
+        <label class="form-label">Profile Photo</label>
+        <InputFile OnChange="HandleFileUpload" class="form-control" accept="image/*" />
+        @* 👆 InputFile = Blazor ka file input component
+       OnChange = file select hone pe method call karo
+       accept="image/*" = sirf images allow karo *@
+    </div>
+
+    @* Preview *@
+    @if (!string.IsNullOrEmpty(member.PhotoPath))
+    {
+        <img src="/uploads/@member.PhotoPath" style="width:100px; height:100px; object-fit:cover; border-radius:50%;" />
+        @* 👆 Preview dikhao — circle shape mein *@
+    }
     <br />
 
     <button type="submit" class="btn btn-info">Register</button>
@@ -56,11 +72,40 @@
 @code {
     private Member member = new Member();
     private string successMessage = "";
+    private IBrowserFile? selectedFile;
+    // 👆 Selected file store karne ke liye
 
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        // 👆 File store karo — abhi save nahi karein ge
+        // Save tab karein ge jab form submit ho
+    }
     private async Task HandleValidSubmit()
     {
         using var db = DbFactory.CreateDbContext();
         db.Members.Add(member);
+
+        if (selectedFile != null)
+        {
+            var extension = Path.GetExtension(selectedFile.Name);
+            // 👆 File extension lo — .jpg, .png etc
+
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            // 👆 Unique name banao — "abc123-def456.jpg"
+            // Guid = globally unique identifier
+
+            var path = Path.Combine(Env.WebRootPath, "uploads", fileName);
+            // 👆 Full path — wwwroot/uploads/abc123.jpg
+
+            using var stream = File.Create(path);
+            await selectedFile.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(stream);
+            // 👆 File ko disk pe save karo
+            // maxAllowedSize = 5MB maximum
+
+            member.PhotoPath = fileName;
+            // 👆 Sirf file name database mein save karo
+        }
         await db.SaveChangesAsync();
 
         // ✅ Sirf Member ko welcome email

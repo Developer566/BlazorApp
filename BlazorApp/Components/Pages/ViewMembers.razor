@@ -59,6 +59,7 @@ else
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>
+                <th>Photo</th>
                 <th>Id</th>
                 <th>Full Name</th>
                 <th>Email</th>
@@ -75,6 +76,12 @@ else
             @foreach (var m in pagedMembers)
             {
                 <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(m.PhotoPath))
+                        {
+                            <img src="/uploads/@m.PhotoPath" style="width:100px; height:100px; object-fit:cover; border-radius:50%;" />
+                        }
+                    </td>
                     <td>@m.Id</td>
                     <td>@m.FullName</td>
                     <td>@m.Email</td>

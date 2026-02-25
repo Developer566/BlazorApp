@@ -20,5 +20,6 @@ namespace BlazorApp.Models
         public string MembershipType { get; set; } = "";
 
         public DateTime RegisteredDate { get; set; } = DateTime.Now;
+        public string? PhotoPath { get; set; } = "";
     }
 }

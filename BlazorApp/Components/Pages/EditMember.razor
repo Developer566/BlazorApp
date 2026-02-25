@@ -3,9 +3,11 @@
 @using BlazorApp.Data
 @using BlazorApp.Models
 @using BlazorApp.Services
-@inject AppDbContext db
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AppDbContext> DbFactory
 @inject NavigationManager Nav
 @inject ToastService ToastService
+@inject IWebHostEnvironment Env
 
 <PageTitle>Edit Member Form</PageTitle>
 <h3>Edit Member</h3>
@@ -19,7 +21,23 @@ else
     <EditForm Model="@member" OnValidSubmit="HandleUpdate" FormName="EditMemberForm">
         <DataAnnotationsValidator />
         <ValidationSummary />
+        <div class="mb-3">
+            <label>Profile Photo</label><br />
 
+            @* Current photo dikhao *@
+            @if (!string.IsNullOrEmpty(member.PhotoPath))
+            {
+                <img src="/uploads/@member.PhotoPath" style="width:80px; height:80px; object-fit:cover; border-radius:50%;"
+                    class="mb-2 d-block" />
+                <small class="text-muted">Current photo — upload new to replace</small>
+            }
+            else
+            {
+                <span class="d-block mb-2">👤 No photo</span>
+            }
+
+            <InputFile OnChange="HandleFileUpload" class="form-control mt-2" accept="image/*" />
+        </div>
         <div>
             <label>Full Name</label><br />
             <InputText @bind-Value="member.FullName" class="form-control" />
@@ -67,15 +85,36 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        using var db = DbFactory.CreateDbContext();
         member = await db.Members.FindAsync(Id);
     }
 
     private async Task HandleUpdate()
     {
+        using var db = DbFactory.CreateDbContext();
+
+        if (selectedFile != null)
+        {
+            var extension = Path.GetExtension(selectedFile.Name);
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            var path = Path.Combine(Env.WebRootPath, "uploads", fileName);
+
+            using var stream = File.Create(path);
+            await selectedFile.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(stream);
+
+            member!.PhotoPath = fileName;
+        }
+
         db.Members.Update(member!);
         await db.SaveChangesAsync();
         ToastService.QueueSuccess("✅ Member updated successfully!");
-        await Task.Delay(500);
-        Nav.NavigateTo("/members"); // redirect back to list
+        Nav.NavigateTo("/members");
+    }
+    private IBrowserFile? selectedFile;
+    // 👆 Selected file store karne ke liye
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
     }
 }
