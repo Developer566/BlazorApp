@@ -4,13 +4,15 @@
 @using BlazorApp.Models
 @using BlazorApp.Services
 @using Microsoft.EntityFrameworkCore
-@inject AppDbContext db
+@inject IDbContextFactory<AppDbContext> DbFactory
 @inject NavigationManager Nav
 @inject ToastService ToastService
 @inject ExportService ExportService
+@inject AuthService AuthService
 @inject IJSRuntime JS
 
 <PageTitle>Members</PageTitle>
+
 @if (isToastVisible)
 {
     <div style="position:fixed; top:20px; right:20px; z-index:9999; min-width:300px;"
@@ -21,9 +23,12 @@
 }
 
 <h3>All Members</h3>
-<a href="/register" class="btn btn-success mb-3">+ Add New Member</a>
-<button class="btn btn-danger mb-3 ms-2" @onclick="ExportPdf">⬇ Export PDF</button>
-<button class="btn btn-success mb-3 ms-2" @onclick="ExportExcel">⬇ Export Excel</button>
+@if (AuthService.IsAdmin)
+{
+    <a href="/register" class="btn btn-success mb-3">+ Add New Member</a>
+    <button class="btn btn-danger mb-3 ms-2" @onclick="ExportPdf">⬇ Export PDF</button>
+    <button class="btn btn-info mb-3 ms-2" @onclick="ExportExcel">⬇ Export Excel</button>
+}
 @if (members == null)
 {
     <p>Loading...</p>
@@ -34,9 +39,22 @@ else if (!members.Any())
 }
 else
 {
-    <div class="mt-5 mb-3 d-flex w-50 float-end">
-        <input type="text" class="form-control me-2" placeholder="Search by name or membership..."
-            @oninput="HandleSearch" />
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <label class="me-2">Show</label>
+            <select class="form-select form-select-sm d-inline w-auto" @onchange="HandlePageSizeChange">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <label class="ms-2">entries</label>
+        </div>
+
+        <div class="w-50">
+            <input type="text" class="form-control form-control-sm" placeholder="Search by name or membership..."
+                @oninput="HandleSearch" />
+        </div>
     </div>
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
@@ -47,7 +65,10 @@ else
                 <th>Phone</th>
                 <th>Membership</th>
                 <th>Registered</th>
-                <th>Actions</th>
+                @if (AuthService.IsAdmin)
+                {
+                    <th>Actions</th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -60,10 +81,13 @@ else
                     <td>@m.Phone</td>
                     <td>@m.MembershipType</td>
                     <td>@m.RegisteredDate.ToString("yyyy-MM-dd")</td>
-                    <td>
-                        <a href="/edit/@m.Id" class="btn btn-warning btn-sm">Edit</a>
-                        <button class="btn btn-danger btn-sm" @onclick="() => ShowConfirm(m.Id, m.FullName)">Delete</button>
-                    </td>
+                    @if (AuthService.IsAdmin)
+                    {
+                        <td>
+                            <a href="/edit/@m.Id" class="btn btn-warning btn-sm">Edit</a>
+                            <button class="btn btn-danger btn-sm" @onclick="() => ShowConfirm(m.Id, m.FullName)">Delete</button>
+                        </td>
+                    }
                 </tr>
             }
         </tbody>
@@ -71,12 +95,13 @@ else
     <!-- Confirmation Dialog -->
     @if (showConfirm)
     {
-        <div style="position:fixed; top:0; left:0; width:100%; height:100%; 
-                                                                background:rgba(0,0,0,0.5); z-index:9998;">
+        <div
+            style="position:fixed; top:0; left:0; width:100%; height:100%; 
+                                                                                        background:rgba(0,0,0,0.5); z-index:9998;">
             <div
                 style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-                                                                    background:white; padding:30px; border-radius:10px; 
-                                                                    z-index:9999; min-width:350px; text-align:center; box-shadow: 0 5px 30px rgba(0,0,0,0.3);">
+                                                                                            background:white; padding:30px; border-radius:10px; 
+                                                                                            z-index:9999; min-width:350px; text-align:center; box-shadow: 0 5px 30px rgba(0,0,0,0.3);">
                 <h4>⚠️ Confirm Delete</h4>
                 <p>Are you sure you want to delete <strong>@confirmMemberName</strong>?</p>
                 <p class="text-muted">This action cannot be undone.</p>
@@ -129,9 +154,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        if (!AuthService.IsLoggedIn)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
         await LoadMembers();
     }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && ToastService.PendingMessage != null)
@@ -149,6 +178,8 @@ else
 
     private async Task LoadMembers()
     {
+        using var db = DbFactory.CreateDbContext();
+        // 👆 Factory se DbContext banao
         members = await db.Members.ToListAsync();
         filteredMembers = members;
         UpdatePagedMembers();
@@ -204,6 +235,7 @@ else
     }
     private async Task DeleteMember(int id)
     {
+        using var db = DbFactory.CreateDbContext();
         var member = await db.Members.FindAsync(id);
         if (member != null)
         {
@@ -213,7 +245,6 @@ else
             toastMessage = "🗑️ Member deleted successfully!";
             isToastVisible = true;
             StateHasChanged();
-
             await Task.Delay(3000);
             isToastVisible = false;
             StateHasChanged();
@@ -252,5 +283,13 @@ else
     {
         searchText = e.Value?.ToString() ?? "";
         Search();
+    }
+    private void HandlePageSizeChange(ChangeEventArgs e)
+    {
+        pageSize = int.Parse(e.Value?.ToString() ?? "5");
+
+        currentPage = 1;
+
+        UpdatePagedMembers();
     }
 }
