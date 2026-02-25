@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "lrvylCd/E24=",
+  "dgSpecHash": "NaLTr9AeGmg=",
   "success": true,
   "projectFilePath": "F:\\BlazorApp\\BlazorApp\\BlazorApp.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\MIAN TRADERS\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\MIAN TRADERS\\.nuget\\packages\\closedxml\\0.102.3\\closedxml.0.102.3.nupkg.sha512",
     "C:\\Users\\MIAN TRADERS\\.nuget\\packages\\dinktopdf\\1.0.8\\dinktopdf.1.0.8.nupkg.sha512",
     "C:\\Users\\MIAN TRADERS\\.nuget\\packages\\documentformat.openxml\\2.16.0\\documentformat.openxml.2.16.0.nupkg.sha512",

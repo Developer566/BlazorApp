@@ -26,6 +26,7 @@ F:\BlazorApp\BlazorApp\bin\Debug\net10.0\BlazorApp.deps.json
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\BlazorApp.runtimeconfig.json
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\BlazorApp.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\BlazorApp.pdb
+F:\BlazorApp\BlazorApp\bin\Debug\net10.0\BCrypt.Net-Next.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\ClosedXML.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\DinkToPdf.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\DocumentFormat.OpenXml.dll

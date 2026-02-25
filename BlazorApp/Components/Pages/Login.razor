@@ -15,17 +15,19 @@
         </div>
         <div class="mb-3">
             <label style="font-weight:600;">Username</label>
-            <input type="text" class="form-control form-control-lg"
-                   @bind="username" placeholder="Enter username" />
+            <input type="text" class="form-control form-control-lg" @bind="username" placeholder="Enter username" />
         </div>
         <div class="mb-4">
             <label style="font-weight:600;">Password</label>
-            <input type="password" class="form-control form-control-lg"
-                   @bind="password" placeholder="Enter password" />
+            <input type="password" class="form-control form-control-lg" @bind="password" placeholder="Enter password" />
         </div>
         <button class="btn btn-primary w-100 btn-lg" @onclick="HandleLogin">
             Login →
         </button>
+        <br /><br />
+        <a class="btn btn-secondary w-100 btn-lg" href="/register-user">
+            Register →
+        </a>
         @if (errorMessage != "")
         {
             <div class="alert alert-danger mt-3 text-center">@errorMessage</div>
@@ -37,7 +39,6 @@
     private string username = "";
     private string password = "";
     private string errorMessage = "";
-
     private void HandleLogin()
     {
         bool success = AuthService.Login(username, password);

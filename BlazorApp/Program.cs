@@ -37,24 +37,17 @@ using (var scope = app.Services.CreateScope())
 {
     var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
     using var db = factory.CreateDbContext();
-    // 👆 Program.cs mein directly db inject nahi hoti
-    // isliye manually scope banate hain aur db lete hain
 
     if (!db.Users.Any())
-    // 👆 Any() = koi bhi user hai database mein?
-    // ! = nahi — matlab agar koi user NAHI hai to andar jao
     {
         db.Users.Add(new BlazorApp.Models.User
         {
             Username = "admin",
-            Password = "admin123",
+            Password = BCrypt.Net.BCrypt.HashPassword("admin123"),
+
             Role = "Admin"
         });
-        // 👆 pehla admin user banao
-
         db.SaveChanges();
-        // 👆 database mein save karo
-        // SaveChanges() = commit — jaise SQL ka INSERT
     }
 }
 app.Run();

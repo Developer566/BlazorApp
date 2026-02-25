@@ -1,0 +1,62 @@
+@page "/register-user"
+@rendermode InteractiveServer
+@using BlazorApp.Data
+@using BlazorApp.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject NavigationManager Nav
+<PageTitle>Register New User</PageTitle>
+<div style="min-height:100vh; background:linear-gradient(135deg, #1a237e, #42a5f5); 
+            display:flex; align-items:center; justify-content:center;">
+    <div style="background:white; padding:40px; border-radius:15px; 
+                min-width:380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+        <h3>Register New User</h3>
+
+        <EditForm Model="@newUser" OnValidSubmit="@HandleSubmit" FormName="RegisterUserForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <InputText class="form-control" @bind-Value="@newUser.Username" />
+                <ValidationMessage For="@(() => newUser.Username)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <InputText type="password" class="form-control" @bind-Value="@newUser.Password" />
+                <ValidationMessage For="@(() => newUser.Password)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Role</label>
+                <InputSelect class="form-control" @bind-Value="@newUser.Role">
+                    <option value="">-- Select Role --</option>
+                    <option value="Admin">Admin</option>
+                    <option value="User">User</option>
+                </InputSelect>
+                <ValidationMessage For="@(() => newUser.Role)" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Register User</button>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    private User newUser = new User();
+    private string successMessage = "";
+
+    private async Task HandleSubmit()
+    {
+        newUser.Password = BCrypt.Net.BCrypt.HashPassword(newUser.Password);
+        // 👆 Plain text → Hash
+
+        using var db = DbFactory.CreateDbContext();
+        db.Users.Add(newUser);
+        await db.SaveChangesAsync();
+        newUser = new User(); // form reset
+         Nav.NavigateTo("/login");
+    }
+}
