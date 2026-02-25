@@ -16,6 +16,7 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
 builder.Services.AddSingleton<AuthService>();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<ExportService>();
+builder.Services.AddScoped<EmailService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

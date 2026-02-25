@@ -6,6 +6,9 @@
 @inject AppDbContext db
 @inject NavigationManager Nav
 @inject ToastService ToastService;
+@inject EmailService EmailService;
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AppDbContext> DbFactory
 <PageTitle>Registration</PageTitle>
 <h3>Member Registration</h3>
 
@@ -56,12 +59,25 @@
 
     private async Task HandleValidSubmit()
     {
+        using var db = DbFactory.CreateDbContext();
         db.Members.Add(member);
         await db.SaveChangesAsync();
-            ToastService.QueueSuccess($"✅ {member.FullName} registered successfully!");
-        
-          await Task.Delay(1500);
+
+        // ✅ Sirf Member ko welcome email
+        try
+        {
+            await EmailService.SendMemberWelcomeAsync(
+            member.Email,
+            member.FullName,
+            member.MembershipType // ✅ yeh add karo
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Email error: {ex.Message}");
+        }
+
+        ToastService.QueueSuccess($"✅ {member.FullName} registered successfully!");
         Nav.NavigateTo("/members");
-        member = new Member(); // reset form
     }
 }

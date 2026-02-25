@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+        .container { max-width: 600px; margin: 30px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #1b5e20, #66bb6a); padding: 30px; text-align: center; }
+        .header h1 { color: white; margin: 0; font-size: 24px; }
+        .body { padding: 30px; }
+        .body h2 { color: #1b5e20; }
+        .info-box { background: #f0fff4; border-left: 4px solid #1b5e20; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .footer { background: #f4f4f4; padding: 20px; text-align: center; color: gray; font-size: 12px; }
+        .btn { display: inline-block; background: #1b5e20; color: white; padding: 12px 30px; border-radius: 5px; text-decoration: none; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Account Created!</h1>
+        </div>
+        <div class="body">
+            <h2>Hello, {{Username}}!</h2>
+            <p>Your account has been successfully created.</p>
+            <div class="info-box">
+                <p><strong>👤 Username:</strong> {{Username}}</p>
+                <p><strong>📧 Email:</strong> {{Email}}</p>
+                <p><strong>🔑 Role:</strong> {{Role}}</p>
+                <p><strong>📅 Created On:</strong> {{Date}}</p>
+            </div>
+            <p>You can now login to BlazorApp with your credentials.</p>
+            <a href="#" class="btn">Login Now</a>
+        </div>
+        <div class="footer">
+            <p>© 2026 BlazorApp. All rights reserved.</p>
+            <p>This is an automated email — please do not reply.</p>
+        </div>
+    </div>
+</body>
+</html>

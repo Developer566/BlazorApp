@@ -27,12 +27,14 @@ F:\BlazorApp\BlazorApp\bin\Debug\net10.0\BlazorApp.runtimeconfig.json
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\BlazorApp.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\BlazorApp.pdb
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\BCrypt.Net-Next.dll
+F:\BlazorApp\BlazorApp\bin\Debug\net10.0\BouncyCastle.Cryptography.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\ClosedXML.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\DinkToPdf.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\DocumentFormat.OpenXml.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\ExcelNumberFormat.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\Humanizer.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\Irony.dll
+F:\BlazorApp\BlazorApp\bin\Debug\net10.0\MailKit.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\Microsoft.Bcl.AsyncInterfaces.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\Microsoft.Build.Locator.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\Microsoft.CodeAnalysis.dll
@@ -46,6 +48,7 @@ F:\BlazorApp\BlazorApp\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.Abstracti
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.Design.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.Relational.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\Microsoft.Extensions.DependencyModel.dll
+F:\BlazorApp\BlazorApp\bin\Debug\net10.0\MimeKit.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\Mono.TextTemplating.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\MySqlConnector.dll
 F:\BlazorApp\BlazorApp\bin\Debug\net10.0\Pomelo.EntityFrameworkCore.MySql.dll
@@ -149,6 +152,9 @@ F:\BlazorApp\BlazorApp\obj\Debug\net10.0\scopedcss\Components\Layout\ReconnectMo
 F:\BlazorApp\BlazorApp\obj\Debug\net10.0\scopedcss\bundle\BlazorApp.styles.css
 F:\BlazorApp\BlazorApp\obj\Debug\net10.0\scopedcss\projectbundle\BlazorApp.bundle.scp.css
 F:\BlazorApp\BlazorApp\obj\Debug\net10.0\compressed\hh92lrx13d-{0}-khy4lop6wu-khy4lop6wu.gz
+F:\BlazorApp\BlazorApp\obj\Debug\net10.0\compressed\2gdedcyq9o-{0}-nqszqsm15o-nqszqsm15o.gz
+F:\BlazorApp\BlazorApp\obj\Debug\net10.0\compressed\sbpmp320yw-{0}-cwz6x9cdye-cwz6x9cdye.gz
+F:\BlazorApp\BlazorApp\obj\Debug\net10.0\compressed\b77oeqxgqx-{0}-iuhst357g0-iuhst357g0.gz
 F:\BlazorApp\BlazorApp\obj\Debug\net10.0\compressed\v7vyzcc6qh-{0}-bqjiyaj88i-bqjiyaj88i.gz
 F:\BlazorApp\BlazorApp\obj\Debug\net10.0\compressed\m5e6rnmcep-{0}-c2jlpeoesf-c2jlpeoesf.gz
 F:\BlazorApp\BlazorApp\obj\Debug\net10.0\compressed\o0q64zz2g2-{0}-erw9l3u2r3-erw9l3u2r3.gz

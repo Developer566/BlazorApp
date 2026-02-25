@@ -1,0 +1,112 @@
+@page "/edit-user/{Id:int}"
+@rendermode InteractiveServer
+@using BlazorApp.Data
+@using BlazorApp.Models
+@using BlazorApp.Services
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject ToastService ToastService
+@inject NavigationManager Nav
+@inject AuthService AuthService
+
+<PageTitle>Edit User</PageTitle>
+
+<div style="min-height:100vh; background:linear-gradient(135deg, #1a237e, #42a5f5); 
+            display:flex; align-items:center; justify-content:center;">
+    <div style="background:white; padding:40px; border-radius:15px; 
+                min-width:380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+
+        <h3 class="mb-4" style="color:#1a237e;">✏️ Edit User</h3>
+
+        @if (user == null)
+        {
+            <p>Loading...</p>
+        }
+        else
+        {
+            <EditForm Model="@user" OnValidSubmit="@HandleSubmit" FormName="EditUserForm">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <InputText class="form-control" @bind-Value="@user.Username" />
+                    <ValidationMessage For="@(() => user.Username)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <InputText type="email" class="form-control" @bind-Value="@user.Email" />
+                    <ValidationMessage For="@(() => user.Email)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        New Password 
+                        <small class="text-muted">(leave blank to keep current)</small>
+                    </label>
+                    @* 👆 Password optional hai edit mein *@
+                    <input type="password" class="form-control" 
+                           @bind="newPassword" 
+                           placeholder="Enter new password or leave blank" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Role</label>
+                    <InputSelect class="form-control" @bind-Value="@user.Role">
+                        <option value="">-- Select Role --</option>
+                        <option value="Admin">Admin</option>
+                        <option value="User">User</option>
+                    </InputSelect>
+                    <ValidationMessage For="@(() => user.Role)" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Update User</button>
+                <a href="/view-users" class="btn btn-secondary w-100 mt-2">Cancel</a>
+            </EditForm>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    // 👆 URL se Id lo — /edit-user/1 → Id = 1
+
+    private User? user;
+    private string newPassword = "";
+    // 👆 Alag variable — form mein naya password
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthService.IsAdmin)
+        {
+            Nav.NavigateTo("/members");
+            return;
+        }
+
+        using var db = DbFactory.CreateDbContext();
+        user = await db.Users.FindAsync(Id);
+        // 👆 Id se user dhundo database mein
+
+        if (user == null)
+            Nav.NavigateTo("/view-users");
+            // 👆 User nahi mila to list pe wapas jao
+    }
+
+    private async Task HandleSubmit()
+    {
+        using var db = DbFactory.CreateDbContext();
+
+        if (!string.IsNullOrEmpty(newPassword))
+        {
+            user!.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            // 👆 Sirf tab hash karo jab naya password diya ho
+        }
+
+        db.Users.Update(user!);
+        await db.SaveChangesAsync();
+
+        ToastService.QueueSuccess($"✅ User '{user!.Username}' updated successfully!");
+        Nav.NavigateTo("/view-users");
+    }
+}

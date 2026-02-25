@@ -1,0 +1,86 @@
+@page "/view-users"
+@rendermode InteractiveServer
+@using BlazorApp.Data
+@using BlazorApp.Models
+@using BlazorApp.Services
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject ToastService ToastService
+@inject NavigationManager Nav
+@inject EmailService EmailService
+@inject AuthService AuthService
+
+<PageTitle>View Users</PageTitle>
+
+<h3>Registered Users</h3>
+
+@if (users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!users.Any())
+{
+    <p><em>No users found.</em></p>
+}
+else
+{
+     <table class="table table-bordered table-striped">
+    @* 👆 Yeh <table> tag missing tha! *@
+        <thead class="table-dark">
+            <tr>
+                <th>Id</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.Username</td>
+                    <td>@user.Email</td>
+                    <td>
+                        <span class="badge @(user.Role == "Admin" ? "bg-danger" : "bg-primary")">
+                            @user.Role
+                        </span>
+                    </td>
+                    <td>
+                        <a href="/edit-user/@user.Id" class="btn btn-warning btn-sm">Edit</a>
+                        <button class="btn btn-danger btn-sm" 
+                                @onclick="() => DeleteUser(user.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<User>? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthService.IsAdmin)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+        using var db = DbFactory.CreateDbContext();
+        users = await db.Users.ToListAsync();
+    }
+    private async Task DeleteUser(int id)
+    {
+        using var db = DbFactory.CreateDbContext();
+        var user = await db.Users.FindAsync(id);
+        if (user != null)
+        {
+            db.Users.Remove(user);
+            await db.SaveChangesAsync();
+            ToastService.QueueSuccess($"✅ User '{user.Username}' deleted successfully!");
+            users?.Remove(user);
+        }
+    }
+}

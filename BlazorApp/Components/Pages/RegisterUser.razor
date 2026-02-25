@@ -2,9 +2,11 @@
 @rendermode InteractiveServer
 @using BlazorApp.Data
 @using BlazorApp.Models
+@using BlazorApp.Services
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject NavigationManager Nav
+@inject EmailService EmailService
 <PageTitle>Register New User</PageTitle>
 <div style="min-height:100vh; background:linear-gradient(135deg, #1a237e, #42a5f5); 
             display:flex; align-items:center; justify-content:center;">
@@ -15,7 +17,11 @@
         <EditForm Model="@newUser" OnValidSubmit="@HandleSubmit" FormName="RegisterUserForm">
             <DataAnnotationsValidator />
             <ValidationSummary />
-
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <InputText type="email" class="form-control" @bind-Value="@newUser.Email" placeholder="Enter email" />
+                <ValidationMessage For="@(() => newUser.Email)" />
+            </div>
             <div class="mb-3">
                 <label class="form-label">Username</label>
                 <InputText class="form-control" @bind-Value="@newUser.Username" />
@@ -51,12 +57,32 @@
     private async Task HandleSubmit()
     {
         newUser.Password = BCrypt.Net.BCrypt.HashPassword(newUser.Password);
-        // 👆 Plain text → Hash
 
         using var db = DbFactory.CreateDbContext();
         db.Users.Add(newUser);
         await db.SaveChangesAsync();
-        newUser = new User(); // form reset
-         Nav.NavigateTo("/login");
+
+        // ✅ Admin + User dono ko email
+        try
+        {
+            await EmailService.SendUserWelcomeAsync(
+            newUser.Email,
+            newUser.Username,
+            newUser.Role // ✅ yeh add karo
+            );
+
+            await EmailService.SendAdminNotificationAsync(
+            newUser.Username,
+            newUser.Email,
+            newUser.Role // ✅ yeh add karo
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Email error: {ex.Message}");
+        }
+
+        successMessage = $"✅ User '{newUser.Username}' registered successfully!";
+        newUser = new User();
     }
 }
